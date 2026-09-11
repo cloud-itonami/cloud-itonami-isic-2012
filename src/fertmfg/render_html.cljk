@@ -4,13 +4,13 @@
   Closes flagship checklist item 2 (com-junkawasaki/root ADR-2607189300).
   Drives the REAL actor stack (fertmfg.operation -> fertmfg.governor ->
   fertmfg.store) through a scenario built from this repo's own
-  `fertmfg.sim` demo driver (confirmed by running `clojure -M:dev:run`
+  `fertmfg.sim` demo driver (confirmed by running `kbb -M:dev:run`
   before this file was written -- its printed audit ledger matches
   `fertmfg.store/sample-data!` ids exactly: batch-001..003, synth-001,
   granulator-002, mnt-1, ship-1). No invented numbers, no timestamps in
   page content, byte-identical across reruns against the same seed.
 
-  Usage: `clojure -M:dev:render-html [out-file]`
+  Usage: `kbb -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
   (:require [jp-go-dds.skin]
             [kotoba.lang.text :as str]
@@ -267,7 +267,7 @@
    "<main>\n"
    "<div class=\"card\">\n"
    "<h2>Production batches</h2>\n"
-   "<p class=\"muted\">Demo snapshot — build-time-generated from <code>fertmfg.store</code> via <code>fertmfg.render-html</code> (<code>clojure -M:dev:render-html</code>). A batch must be independently <code>:registered?</code> and <code>:verified?</code> before shipment coordination may proceed; shipment weight is recomputed from the batch's own logged production weight.</p>\n"
+   "<p class=\"muted\">Demo snapshot — build-time-generated from <code>fertmfg.store</code> via <code>fertmfg.render-html</code> (<code>kbb -M:dev:render-html</code>). A batch must be independently <code>:registered?</code> and <code>:verified?</code> before shipment coordination may proceed; shipment weight is recomputed from the batch's own logged production weight.</p>\n"
    (batches-table db) "\n</div>\n"
    "<div class=\"card\">\n"
    "<h2>Equipment</h2>\n"
