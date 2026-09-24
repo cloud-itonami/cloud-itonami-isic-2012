@@ -1,0 +1,45 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:dev:physics` runs it.
+;;
+;; The README has no "Robotics premise" section; its Scope names the plant
+;; this actor coordinates (ISIC 2012): ammonia synthesis, granulation and
+;; prilling lines for straight-N, phosphate and compound fertilizers, UAN
+;; solution, and outbound shipment. The physical work of that plant taken
+;; here: cooling granules in the fluid-bed cooler before bagging, moving
+;; 1 t bulk bags (FIBC) up the ramp to the dispatch dock, and loading UAN solution into
+;; road tankers.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isic-2012"
+ :cases
+ [{:id :granule-cooling
+   :kind :thermal
+   :procedure "one 90 C granule in the fluid-bed cooler (25 C air, flat-plate approximation of the granule, centre adiabatic) must fall below 50 C at its centre before bagging"
+   :params {:thickness-m 0.0015 :conductivity-w-mk 0.5 :density-kg-m3 1330.0 :specific-heat-j-kgk 1550.0
+            :t0-c 90.0 :t-hot-c 25.0 :h-front-w-m2k 100.0 :h-back-w-m2k 0.0
+            :threshold-c 50.0 :threshold-direction :falling :duration-s 600.0 :nodes 7}
+   :sweep {:param :thickness-m :values [0.0005 0.001 0.0015 0.002 0.003]}
+   :quantity :time-to-threshold-s
+   :limit {:max 60.0 :basis "estimate: granule residence time in the fluid-bed cooler taken as one minute; 50 C taken as the caking-safe bagging temperature"}
+   :boundary {:lo 0.0002 :hi 0.006}}
+  {:id :fibc-up-dispatch-ramp
+   :kind :transport
+   :procedure "AMR with forks carries a filled bulk bag (FIBC) up the 4-degree ramp from the bagging floor to the dispatch dock"
+   :params {:mass-kg 900.0 :distance-m 30.0 :v-max-mps 1.2 :a-max-mps2 0.4 :slope-deg 4.0
+            :brake-decel-mps2 1.0 :drive-force-n 2500.0 :crr 0.015
+            :cog-height-m 0.50 :payload-cog-height-m 1.10 :support-half-length-m 0.60 :max-time-s 3600.0}
+   :sweep {:param :payload-kg :values [500.0 800.0 1000.0 1250.0 1500.0]}
+   :quantity :cycle-time-s
+   :limit {:max 60.0 :basis "estimate: one ramp leg per minute keeps pace with the bagging line"}
+   :boundary {:lo 100.0 :hi 3000.0}}
+  {:id :uan-tanker-loading
+   :kind :pipe-flow
+   :procedure "pump UAN solution from the storage tank to the road-tanker loading arm (100 mm, 120 m, 6 m rise)"
+   :params {:diameter-m 0.10 :length-m 120.0 :roughness-m 4.5e-5 :density-kg-m3 1320.0
+            :viscosity-pa-s 5.0e-3 :pump-efficiency 0.65 :elevation-m 6.0}
+   :sweep {:param :q-m3s :values [0.005 0.010 0.015 0.020 0.025]}
+   :quantity :pump-power-w
+   :limit {:max 7500.0 :basis "estimate: 7.5 kW loading-pump motor assumed for the tanker bay"}
+   :boundary {:lo 0.002 :hi 0.06}}]}
